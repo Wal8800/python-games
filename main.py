@@ -2,6 +2,7 @@ from shapely.geometry import Polygon
 import datetime
 import pygame
 import time
+import random
 
 
 class Player(object):
@@ -33,7 +34,7 @@ class Enemy(object):
         self.y = y
         self.width = width
         self.height = height
-        self.vel = 5
+        self.vel = random.randint(4, 7)
 
     def draw(self, win):
         pygame.draw.rect(win, (0, 255, 0),
@@ -54,8 +55,8 @@ class Enemy(object):
 # mainloop
 pygame.init()
 
-win_width = 500
-win_height = 480
+win_width = 700
+win_height = 400
 black = (0, 0, 0)
 white = (255, 255, 255)
 red = (200, 0, 0)
@@ -76,18 +77,22 @@ def game_intro():
     is_intro = True
 
     while is_intro:
+        key_pressed = False
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 quit()
 
+            if event.type == pygame.KEYDOWN:
+                key_pressed = True
+
         click = pygame.mouse.get_pressed()
-        if click[0] == 1:
+        if click[0] == 1 or key_pressed:
             break
 
         win.fill(black)
         largeText = pygame.font.Font('freesansbold.ttf', 32)
-        TextSurf, TextRect = text_objects("Click To Play", largeText)
+        TextSurf, TextRect = text_objects("Press Any Key to Start", largeText)
         TextRect.center = ((win_width/2), (win_height/2))
         win.blit(TextSurf, TextRect)
         pygame.display.update()
@@ -179,7 +184,8 @@ def game_loop():
         time_score = time.time() - starting_time
         if spawn_count >= 50:
             spawn_count = 0
-            new_enemy = Enemy(win_width + 5, 440, 30, 30)
+            new_enemy = Enemy(win_width + 5,  win_height - enemy_height -
+                              ground_thickness, enemy_width, enemy_height)
             enemy_list.append(new_enemy)
 
         for event in pygame.event.get():
@@ -192,13 +198,13 @@ def game_loop():
             if man.to_polygon().intersects(enemy.to_polygon()):
                 return time_score
 
-            enemy.x -= 5
+            enemy.x -= enemy.vel
 
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT] and man.x > man.vel:
             man.x -= man.vel
 
-        if keys[pygame.K_RIGHT] and man.x < 500 - man.width - man.vel:
+        if keys[pygame.K_RIGHT] and man.x < win_width - man.width - man.vel:
             man.x += man.vel
 
         if not(man.isJump):
