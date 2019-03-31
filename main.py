@@ -3,7 +3,7 @@ import datetime
 from shapely.geometry import Polygon
 
 
-class player(object):
+class Player(object):
     def __init__(self, x, y, width, height):
         self.x = x
         self.y = y
@@ -17,8 +17,16 @@ class player(object):
         pygame.draw.rect(win, (255, 0, 0),
                          (self.x, self.y, self.width, self.height))
 
+    def to_polygon(self):
+        return Polygon([
+            (self.x, self.y),
+            (self.x + self.width, self.y),
+            (self.x, self.y + self.height),
+            (self.x + self.width, self.y + self.height)
+        ])
 
-class enemy(object):
+
+class Enemy(object):
     def __init__(self, x, y, width, height):
         self.x = x
         self.y = y
@@ -33,11 +41,20 @@ class enemy(object):
     def hit(self):
         print(datetime.datetime.now())
 
+    def to_polygon(self):
+        return Polygon([
+            (self.x, self.y),
+            (self.x + self.width, self.y),
+            (self.x, self.y + self.height),
+            (self.x + self.width, self.y + self.height)
+        ])
+
 
 def redrawGameWindow():
     win.fill((0, 0, 0))
     man.draw(win)
-    enemy.draw(win)
+    for enemy in enemy_list:
+        enemy.draw(win)
     pygame.display.update()
 
 
@@ -49,36 +66,36 @@ win_height = 480
 win = pygame.display.set_mode((win_width, win_height))
 
 pygame.display.set_caption("006")
-man = player(0, 420, 50, 50)
-enemy = enemy(210, 440, 30, 30)
+man = Player(0, 420, 50, 50)
+init_enemy = Enemy(win_width + 5, 440, 30, 30)
 is_game_running = True
 
+enemy_list = [
+    init_enemy
+]
+
 clock = pygame.time.Clock()
+spawn_count = 0
 while is_game_running:
     clock.tick(60)
+    spawn_count += 1
+    if spawn_count >= 50:
+        spawn_count = 0
+        new_enemy = Enemy(win_width + 5, 440, 30, 30)
+        enemy_list.append(new_enemy)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             is_game_running = False
 
+    enemy_list = [enemy for enemy in enemy_list if enemy.x > -enemy.width]
+    for enemy in enemy_list:
+        if man.to_polygon().intersects(enemy.to_polygon()):
+            enemy.hit()
+
+        enemy.x -= 5
+
     keys = pygame.key.get_pressed()
-
-    man_shape = Polygon([
-        (man.x, man.y),
-        (man.x + man.width, man.y),
-        (man.x, man.y + man.height),
-        (man.x + man.width, man.y + man.height)
-    ])
-
-    enemy_shape = Polygon([
-        (enemy.x, enemy.y),
-        (enemy.x + enemy.width, enemy.y),
-        (enemy.x, enemy.y + enemy.height),
-        (enemy.x + enemy.width, enemy.y + enemy.height)
-    ])
-    if man_shape.intersects(enemy_shape):
-        enemy.hit()
-
     if keys[pygame.K_LEFT] and man.x > man.vel:
         man.x -= man.vel
 
