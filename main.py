@@ -1,64 +1,68 @@
 import pygame
 
-# define a main function
+
+class player(object):
+    def __init__(self, x, y, width, height):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.vel = 5
+        self.isJump = False
+        self.jumpCount = 10
+
+    def draw(self, win):
+        pygame.draw.rect(win, (255, 0, 0),
+                         (self.x, self.y, self.width, self.height))
 
 
-def main():
-    win = pygame.display.set_mode((500, 500))
-    pygame.display.set_caption("First Game")
+def redrawGameWindow():
+    win.fill((0, 0, 0))
+    man.draw(win)
+    pygame.display.update()
 
-    x = 50
-    y = 50
-    width = 40
-    height = 40
-    vel = 5
 
-    run = True
+# mainloop
+pygame.init()
 
-    is_jump = False
-    base_jump_count = 7
-    jump_count = base_jump_count
+win_width = 500
+win_height = 480
+win = pygame.display.set_mode((win_width, win_height))
 
-    while run:
-        pygame.time.delay(20)
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                run = False
+pygame.display.set_caption("First Game")
+man = player(200, 410, 64, 64)
+run = True
 
-        keys = pygame.key.get_pressed()
-        
-        if keys[pygame.K_LEFT] and x > vel: 
-            x -= vel
+clock = pygame.time.Clock()
+while run:
+    clock.tick(60)
 
-        if keys[pygame.K_RIGHT] and x < 500 - vel - width:  
-            x += vel
-            
-        if not(is_jump): 
-            if keys[pygame.K_UP] and y > vel:
-                y -= vel
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            run = False
 
-            if keys[pygame.K_DOWN] and y < 500 - height - vel:
-                y += vel
+    keys = pygame.key.get_pressed()
 
-            if keys[pygame.K_SPACE]:
-                is_jump = True
+    if keys[pygame.K_LEFT] and man.x > man.vel:
+        man.x -= man.vel
+    
+    if keys[pygame.K_RIGHT] and man.x < 500 - man.width - man.vel:
+        man.x += man.vel
+
+    if not(man.isJump):
+        if keys[pygame.K_SPACE]:
+            man.isJump = True
+    else:
+        if man.jumpCount >= -10:
+            neg = 1
+            if man.jumpCount < 0:
+                neg = -1
+            man.y -= (man.jumpCount ** 2) * 0.5 * neg
+            man.jumpCount -= 1
         else:
-            if jump_count >= -base_jump_count:
-                y -= (jump_count * abs(jump_count)) * 0.5
-                jump_count -= 1
-            else: 
-                jump_count = base_jump_count
-                is_jump = False
-        
-        win.fill((0,0,0))
-        pygame.draw.rect(win, (255,0,0), (x, y, width, height))   
-        pygame.display.update() 
+            man.isJump = False
+            man.jumpCount = 10
 
-    pygame.quit()
+    redrawGameWindow()
 
-
-# run the main function only if this module is executed as the main script
-# (if you import this as a module then nothing is executed)
-if __name__ == "__main__":
-    # call the main function
-    main()
+pygame.quit()
