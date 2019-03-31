@@ -16,11 +16,24 @@ class player(object):
                          (self.x, self.y, self.width, self.height))
 
 
+class enemy(object):
+    def __init__(self, x, y, width, height):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.vel = 5
+
+    def draw(self, win):
+        pygame.draw.rect(win, (0, 255, 0),
+                         (self.x, self.y, self.width, self.height))
+
+
 def redrawGameWindow():
     win.fill((0, 0, 0))
     man.draw(win)
+    enemy.draw(win)
     pygame.display.update()
-
 
 # mainloop
 pygame.init()
@@ -29,23 +42,24 @@ win_width = 500
 win_height = 480
 win = pygame.display.set_mode((win_width, win_height))
 
-pygame.display.set_caption("First Game")
-man = player(200, 410, 64, 64)
-run = True
+pygame.display.set_caption("006")
+man = player(0, 420, 50, 50)
+enemy = enemy(210, 440, 30, 30)
+is_game_running = True
 
 clock = pygame.time.Clock()
-while run:
+while is_game_running:
     clock.tick(60)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            run = False
+            is_game_running = False
 
     keys = pygame.key.get_pressed()
 
     if keys[pygame.K_LEFT] and man.x > man.vel:
         man.x -= man.vel
-    
+
     if keys[pygame.K_RIGHT] and man.x < 500 - man.width - man.vel:
         man.x += man.vel
 
