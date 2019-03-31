@@ -1,4 +1,6 @@
 import pygame
+import datetime
+from shapely.geometry import Polygon
 
 
 class player(object):
@@ -28,12 +30,16 @@ class enemy(object):
         pygame.draw.rect(win, (0, 255, 0),
                          (self.x, self.y, self.width, self.height))
 
+    def hit(self):
+        print(datetime.datetime.now())
+
 
 def redrawGameWindow():
     win.fill((0, 0, 0))
     man.draw(win)
     enemy.draw(win)
     pygame.display.update()
+
 
 # mainloop
 pygame.init()
@@ -56,6 +62,22 @@ while is_game_running:
             is_game_running = False
 
     keys = pygame.key.get_pressed()
+
+    man_shape = Polygon([
+        (man.x, man.y),
+        (man.x + man.width, man.y),
+        (man.x, man.y + man.height),
+        (man.x + man.width, man.y + man.height)
+    ])
+
+    enemy_shape = Polygon([
+        (enemy.x, enemy.y),
+        (enemy.x + enemy.width, enemy.y),
+        (enemy.x, enemy.y + enemy.height),
+        (enemy.x + enemy.width, enemy.y + enemy.height)
+    ])
+    if man_shape.intersects(enemy_shape):
+        enemy.hit()
 
     if keys[pygame.K_LEFT] and man.x > man.vel:
         man.x -= man.vel
