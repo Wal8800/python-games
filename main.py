@@ -4,20 +4,45 @@ import pygame
 import time
 import random
 
+pygame.init()
+ground_thickness = 10
+win_width = 700
+win_height = 400
+black = (0, 0, 0)
+white = (255, 255, 255)
+red = (200, 0, 0)
+green = (0, 200, 0)
+bright_red = (255, 0, 0)
+bright_green = (0, 255, 0)
+win = pygame.display.set_mode((win_width, win_height))
+pygame.display.set_caption("006")
+clock = pygame.time.Clock()
+
 
 class Player(object):
-    def __init__(self, x, y, width, height):
-        self.x = x
-        self.y = y
-        self.width = width
-        self.height = height
+    def __init__(self, starting_x):
+        smallText = pygame.font.SysFont("comicsansms", 84)
+        textSurf, textRect = text_objects("6", smallText)
+
+        self.width = textSurf.get_width()
+        self.height = smallText.get_ascent()
+        self.x = starting_x
+        self.y = win_height - self.height - ground_thickness
         self.vel = 5
         self.isJump = False
         self.jumpCount = 10
 
     def draw(self, win):
-        pygame.draw.rect(win, (255, 0, 0),
-                         (self.x, self.y, self.width, self.height))
+        # pygame.draw.rect(win, (255, 0, 0),
+        #                  (self.x, self.y, self.width, self.height), 1)
+        smallText = pygame.font.SysFont("comicsansms", 84)
+        textSurf, textRect = text_objects("6", smallText)
+        desc = -1 * smallText.get_descent()
+        textRect.center = (
+            (self.x+(self.width/2)),
+            (self.y+(self.height/2) + desc - 7)
+        )
+        win.blit(textSurf, textRect)
 
     def to_polygon(self):
         return Polygon([
@@ -50,22 +75,6 @@ class Enemy(object):
             (self.x, self.y + self.height),
             (self.x + self.width, self.y + self.height)
         ])
-
-
-# mainloop
-pygame.init()
-
-win_width = 700
-win_height = 400
-black = (0, 0, 0)
-white = (255, 255, 255)
-red = (200, 0, 0)
-green = (0, 200, 0)
-bright_red = (255, 0, 0)
-bright_green = (0, 255, 0)
-win = pygame.display.set_mode((win_width, win_height))
-pygame.display.set_caption("006")
-clock = pygame.time.Clock()
 
 
 def text_objects(text, font):
@@ -158,11 +167,7 @@ def game_ended(time_score):
 
 
 def game_loop():
-    man_height = 50
-    man_width = 50
-    ground_thickness = 10
-    man = Player(0, win_height - man_height -
-                 ground_thickness, man_width, man_height)
+    man = Player(0)
 
     enemy_height = 30
     enemy_width = 30
